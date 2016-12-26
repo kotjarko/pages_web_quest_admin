@@ -1,0 +1,150 @@
+Комната 1. Операторские команды и статусы.
+=================================================
+
+основное управление:
+	room1_start					- запустить квест (1-я комната)
+	room1_stop						- прервать квест (1-я комната)
+	room1_reload					- перезарядка (1-я комната)
+
+выход во 2-ю комн.
+	команды:
+		room1_exitdoor_unlock			- выключить магнит
+		room1_exitdoor_lock			- включить магнит
+	статусы:
+		room1_exitdoor_unlocked*		- магнит выключен
+		room1_exitdoor_locked			- магнит включен
+
+освещение (N = 0..100, по умолчанию: 0):
+	команды:
+		room1_main_light N			- главное освещение
+		room1_uv_light N			- УФ-подсветка
+	статусы:
+		room1_main_light N			- главное освещение
+		room1_uv_light N			- УФ-подсветка
+
+прохождение квеста:
+	команды:
+		room1_game_skip_scan			- пропустить сканировение рук
+		room1_game_start_print		- начать печать объекта
+		room1_game_extract_object		- выбросить напечатанный объект
+		room1_game_start_bgame		- начать игру на кнопках
+		room1_game_skip_bgame			- пропустить игру
+		room1_game_start_shrk			- запустить уменьшитель
+		room1_game_num_objects N 		- установить кол-во объектов для выхода (N = 0..3)
+	статусы:
+		room1_game_stopped*			- остановлена
+		room1_game_wait_scan			- ожидаем завершения сканирования
+		room1_game_wait_print_start	- ожидаем запуска печати
+		room1_game_printing			- начата печать объекта
+		room1_game_bgame_wait			- ожидаем начала игры на кнопках
+		room1_game_bgame_1			- игра на кнопках, уровень 1
+		room1_game_bgame_2			- игра на кнопках, уровень 2
+		room1_game_bgame_3			- игра на кнопках, уровень 3
+		room1_game_wait_shrk_activate 	- ожидаем запуска уменьшителя
+		room1_game_wait_shrk_object	- ожидаем объекта в уменьшитель
+		room1_game_wait_shrk_door		- ожидаем закрытия дверки уменьшителя
+		room1_game_shrinking_object	- работает уменьшитель
+		room1_game_wait_objects		- ожидаем установки объектвов
+		room1_game_ended			- комната пройдена
+		
+установка объектов в слоты:
+	room1_no_object_1*				- первый объект не установлен
+	room1_have_object_1				- первый объект установлен
+
+	room1_no_object_2*				- второй объект не установлен
+	room1_have_object_2				- второй объект установлен
+
+	room1_no_object_3*				- третий объект не установлен
+	room1_have_object_3				- третий объект установлен
+	
+==================================
+технические команды и статусы
+==================================
+
+сканеры руки:
+	команды:
+		room1_scan_finish			- принудительно завершить
+		room1_scan_reset			- сброс
+	статусы:
+		room1_scan_default*			- не пройдено
+		room1_scan_passed			- пройдено
+
+3д-принтер:
+	команды:
+		room1_print_stop			- остановить печать
+		room1_print_go_home			- возврат/калибровка головки
+		room1_print_start			- запустить печать
+
+		room1_lift_stop				- остановить шторку
+		room1_lift_extend			- поднять шторку
+		room1_lift_retract			- опустить шторку
+		room1_lift_slow_extend		- медленно поднимать шторку
+		room1_lift_slow_retract		- медленно опускать шторку
+
+		room1_extr_stop				- остановить выбрасыватель
+		room1_extr_extend			- выдвинуть выбрасыватель
+		room1_extr_retract			- убрать выбрасыватель
+	
+	статусы:
+		room1_printer_stopped*		- печать остановлена
+		room1_printer_active			- печать запущена
+		
+		room1_lift_stopped*			- шторка стоит в промежуточном положении
+		room1_lift_moving			- шторка движется
+		room1_lift_extended			- шторка поднята
+		room1_lift_retracted			- шторка опущена
+		room1_lift_error			- шторка застряла
+		
+		room1_extr_stopped*			- выбрасыватель стоит в промежуточном положении
+		room1_extr_moving			- выбрасыватель движется
+		room1_extr_extended			- выбрасыватель выдвинут
+		room1_extr_retracted			- выбрасыватель убран
+		room1_extr_error			- выбрасыватель застрял
+
+уменьшитель:
+	команды:
+		room1_shrk_stop				- остановить
+		room1_shrk_left				- переместить камерой прёма к игроку
+		room1_shrk_right			- переместить камерой выдачи к игроку
+
+		room1_shrk_door_lock			- разблокировать дверку
+		room1_shrk_door_unlock		- заблокировать дверку
+
+	статусы:
+		room1_shrk_stopped*			- стоит в промежуточном положении
+		room1_shrk_moving			- двигается
+		room1_shrk_at_left			- стоит каморкой приёма к игроку
+		room1_shrk_at_right			- стоит каморкой выдачи к игроку
+		room1_shrk_error			- застрял
+		
+		room1_shrk_object_undetect*	- объект не установлен
+		room1_shrk_object_detect		- объект установлен
+		
+		room1_shrk_door_opened*		- дверка открыта
+		room1_shrk_door_closed		- дверка закрыта
+		room1_shrk_door_locked		- дверка закрыта и заблокирована
+
+игра на кнопках:
+	команды:
+		room1_bgame_reset			- сброс
+		room1_bgame_start_1			- начать уровень 1
+		room1_bgame_start_2			- начать уровень 2
+		room1_bgame_start_3			- начать уровень 3
+		room1_bgame_finish			- принудительно завершить
+		
+	статусы:
+		room1_bgame_stopped*			- остановлена
+		room1_bgame_lose			- проигрыш
+		room1_bgame_win				- выигрыш
+		room1_bgame_playing			- в процессе
+		
+
+озвучка:
+	команды:
+		room1_sound_play N			- воспроизвести звук N
+		room1_sound_stop			- стоп
+
+	статусы:
+		room1_sound_idle*			- готовность
+		room1_sound_busy			- идёт воспроизведение
+

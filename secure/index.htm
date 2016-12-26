@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Панель администратора квеста "ИСКИН"</title>
+		<link rel="shortcut icon" href="../favicon.ico"></link>
+		<meta charset="windows-1251" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<style>
+			body {
+				background: url(../img/stars.jpg) center center repeat-y fixed padding-box content-box;
+				background-size: cover;
+				font-family: "Courier New", Courier, monospace;
+				top: 0;
+				bottom: 0;
+				left: 0; 
+				right: 0;
+				width: 100%;
+				z-index: 1;
+				color: lightgray;
+				font-size: 0.5em;
+			}
+			body fieldset {
+				color: white;
+				width: 90%;
+				font-size: 0.9em;
+				
+				padding-left: 2em;
+				padding-right: 2em;
+				padding-top: 1em;
+				border: 0;
+				background: -webkit-linear-gradient(90deg, #333333, #000000) repeat scroll 0 0 transparent;
+				background: -moz-linear-gradient(90deg, #333333, #000000) repeat scroll 0 0 transparent;
+				border: 1px solid #555555;
+					border-radius: 10px 10px 10px 10px;
+						box-shadow: 0 0 15px #555555;
+					margin: 5px auto 0;
+					padding: 10px;
+				line-height: 2.5;
+			}
+			body fieldset legend{
+				font-size: 1.2em;
+				
+				text-align: left;
+				background: -webkit-linear-gradient(90deg, #333333, #000000) repeat scroll 0 0 transparent;
+				background: -moz-linear-gradient(90deg, #333333, #000000) repeat scroll 0 0 transparent;
+				border-radius: 10px 10px 10px 10px;
+						box-shadow: 0 0 15px #555555;
+				padding-right: 1em;
+				padding-left: 1em;
+			}			
+			body fieldset fieldset{
+				color: lightgray;
+				width: auto;
+				font-size: 0.9em;
+			}
+			body fieldset fieldset legend{
+				font-size: 1em;
+			}
+			
+			body fieldset fieldset fieldset{
+				color: gray;
+				width: auto;
+				font-size: 0.9em;
+				
+			}
+			body fieldset fieldset fieldset legend{
+				font-size: 1em;
+			}				
+			.start {
+				color: lightgreen;
+			}
+			.stop {
+				color: lightcoral;
+			}
+			
+			@-webkit-keyframes blinker {
+				from {opacity: 1.0;}
+				to {opacity: 0.3;}
+			}
+			.error {
+				border: 1px dashed;
+				font-size:1.4em;
+				font-weight: 600;
+				color: yellow;
+				text-decoration: blink;
+				-webkit-animation-name: blinker;
+				-webkit-animation-duration: 0.6s;
+				-webkit-animation-iteration-count:infinite;
+				-webkit-animation-timing-function:ease-in-out;
+				-webkit-animation-direction: alternate;
+			}
+			
+			.info_class {
+				clear: none;
+				display: inline-block;
+			}
+			a.button {
+			  color: #fff;
+			  text-decoration: none;
+			  user-select: none;
+			  background: rgb(190,75,56);
+			  padding: .5em 1em;
+			  outline: none;
+			  font-size: 0.9em;
+			  margin-top: 20px;
+			  border: 1px solid #555555;
+			  border-radius: 10px 10px 10px 10px;	
+			  white-space: nowrap;
+			} 
+			a.button:hover { background: rgb(232,95,76); }
+			a.button:active { background: rgb(152,15,0); }	
+
+			.operate_button {background: rgb(75,190,56);}
+			
+			.collapsed {
+				overflow: hidden;
+				height: 20px;
+			}
+			.collapsed .button {
+				display: none;
+			}
+			
+			legend {
+				cursor:pointer;
+			}
+		</style>
+		<script>
+			var statuses = [
+				
+				["room1_reloading","Перезаряжается","start","room1"],
+				["room1_started","Запущен","start","room1"],
+				["room1_stopped","Остановлен","stop","room1"],
+				
+				["room1_sound_idle","готовность","start","room1_sound_status"],
+				["room1_sound_busy","идёт воспроизведение","stop","room1_sound_status"],
+				
+				["room1_game_stopped","остановлена","stop","room1_game"],
+				["room1_game_wait_scan","ожидаем завершения сканирования","start","room1_game"],
+				["room1_game_wait_print_start","ожидаем запуска печати","start","room1_game"],
+				["room1_game_printing","начата печать объекта","start","room1_game"],
+				["room1_game_bgame_wait","ожидаем начала игры на кнопках","start","room1_game"],
+				["room1_game_bgame_1","игра на кнопках, уровень 1","start","room1_game"],
+				["room1_game_bgame_2","игра на кнопках, уровень 2","start","room1_game"],
+				["room1_game_bgame_3","игра на кнопках, уровень 3","start","room1_game"],
+				["room1_game_wait_shrk_activate","ожидаем запуска уменьшителя","start","room1_game"],
+				["room1_game_wait_shrk_object","ожидаем объекта в уменьшитель","start","room1_game"],
+				["room1_game_wait_shrk_door","ожидаем закрытия дверки уменьшителя","start","room1_game"],
+				["room1_game_shrinking_object","работает уменьшитель","start","room1_game"],	
+				["room1_game_wait_objects","ожидаем установки объектов","start","room1_game"],
+				["room1_game_ended","комната пройдена","stop","room1_game"],
+				
+				["room1_exitdoor_unlocked","магнит выключен","start","room1_exit"],
+				["room1_exitdoor_locked","магнит включен","stop","room1_exit"],
+				
+				["room1_no_object_1","Нет объекта","stop","room1_object_1"],
+				["room1_have_object_1","Есть объект","start","room1_object_1"],
+				["room1_no_object_2","Нет объекта","stop","room1_object_2"],
+				["room1_have_object_2","Есть объект","start","room1_object_2"],
+				["room1_no_object_3","Нет объекта","stop","room1_object_3"],
+				["room1_have_object_3","Есть объект","start","room1_object_3"],
+				
+				["room1_offline","Нет связи с комнатой","error","comm_room1","Нет связи с первой комнатой!"],
+				["room1_online","Есть связь","start","comm_room1"],
+				["room1_comm_error","Ошибка передачи данных","error","comm_room1","Ошибка связи с первой комнатой!"],
+				
+				["room1_scan_default","Не пройдено","stop","status_scan"],
+				["room1_scan_passed","Пройдено","start","status_scan"],
+				
+				["room1_printer_stopped","Печать остановлена","stop","status_print"],
+				["room1_printer_active","Печать запущена","start","status_print"],
+				
+				["room1_lift_stopped","шторка стоит в промежуточном положении","stop","status_lift"],
+				["room1_lift_extended","шторка поднята","start","status_lift"],
+				["room1_lift_retracted","шторка опущена","start","status_lift"],
+				["room1_lift_moving","шторка движется","start","status_lift"],
+				["room1_lift_error","шторка застряла","error","status_lift","Шторка застряла!"],
+				
+				["room1_extr_stopped","выбрасыватель стоит в промежуточном положении","stop","status_extr"],
+				["room1_extr_extended","выбрасыватель выдвинут","start","status_extr"],
+				["room1_extr_retracted","выбрасыватель убран","start","status_extr"],
+				["room1_extr_moving","выбрасыватель движется","start","status_extr"],
+				["room1_extr_error","выбрасыватель застрял","error","status_extr","Выбрасыватель фигур застрял!"],
+				
+				["room1_shrk_object_undetect","Не обнаружен","stop","status_shrk_object"],
+				["room1_shrk_object_detect","Обнаружен","start","status_shrk_object"],
+				
+				["room1_shrk_platform_stopped","Остановлена","stop","status_shrk_platform"],
+				["room1_shrk_platform_at_left","Слева","start","status_shrk_platform"],
+				["room1_shrk_platform_at_right","Справа","start","status_shrk_platform"],
+				["room1_shrk_platform_moving","Двигается","start","status_shrk_platform"],
+				["room1_shrk_platform_error","Застряла","error","status_shrk_platform","Платформа уменьшителя застряла!"],
+				
+				["room1_shrk_door_opened","Открыта","start","status_shrk_door"],
+				["room1_shrk_door_closed","Закрыта","stop","status_shrk_door"],
+				["room1_shrk_door_locked","Заблокирована","stop","status_shrk_door"],
+				
+				["room1_bgame_stopped","остановлена","stop","status_bgame"],
+				["room1_bgame_playing","в процессе","start","status_bgame"],
+				["room1_bgame_lose","проигрыш","stop","status_bgame"],
+				["room1_bgame_win","выигрыш","start","status_bgame"],
+				
+				["room2_reloading","Перезаряжается","start","room2"],
+				["room2_stopped","Остановлена","stop","room2"],
+				["room2_started","Запущена","start","room2"],
+
+				["room2_mockup_offline","Нет связи","stop","room2_mockup"],
+				["room2_mockup_online","Есть связь","start","room2_mockup"],
+				["room2_mockup_comm_error","Ошибка связи","error","room2_mockup"],
+
+				["room2_vdoor_offline","Нет связи","stop","room2_vdoor"],
+				["room2_vdoor_online","Есть связь","start","room2_vdoor"],
+				["room2_vdoor_comm_error","Ошибка связи","error","room2_vdoor"],
+
+				["room2_table_offline","Нет связи","stop","room2_table"],
+				["room2_table_online","Есть связь","start","room2_table"],
+				["room2_table_comm_error","Ошибка связи","error","room2_table"],
+
+				["room2_exitdoor_unlocked","Открыта","start","room2_exitdoor"],
+				["room2_exitdoor_locked","Заперта","stop","room2_exitdoor"],
+
+				["room2_ballgame_default","Не пройдена","stop","room2_ballgame"],
+				["room2_ballgame_finished","Пройдена","start","room2_ballgame"],
+
+				["room2_stand_coil1_unlocked","Открыта","start","room2_stand_coil1"],
+				["room2_stand_coil1_locked","Заперта","stop","room2_stand_coil1"],
+				["room2_stand_coil2_unlocked","Открыта","start","room2_stand_coil2"],
+				["room2_stand_coil2_locked","Заперта","stop","room2_stand_coil2"],
+				["room2_stand_coil3_unlocked","Открыта","start","room2_stand_coil2"],
+				["room2_stand_coil3_locked","Заперта","stop","room2_stand_coil2"],
+
+				["room2_eyes_circuit_undetected","Не обнаружен","stop","room2_eyes_circuit"],
+				["room2_eyes_circuit_detected","Обнаружен","start","room2_eyes_circuit"],
+
+				["room2_mockup_wall1_undetect","Не обнаружена","stop","room2_mockup_wall1"],
+				["room2_mockup_wall1_detect","Обнаружена","start","room2_mockup_wall1"],
+				["room2_mockup_wall2_undetect","Не обнаружена","stop","room2_mockup_wall2"],
+				["room2_mockup_wall2_detect","Обнаружена","start","room2_mockup_wall2"],
+				["room2_mockup_wall3_undetect","Не обнаружена","stop","room2_mockup_wall3"],
+				["room2_mockup_wall3_detect","Обнаружена","start","room2_mockup_wall3"],
+				["room2_mockup_wall4_undetect","Не обнаружена","stop","room2_mockup_wall4"],
+				["room2_mockup_wall4_detect","Обнаружена","start","room2_mockup_wall4"],
+				["room2_mockup_wall5_undetect","Не обнаружена","stop","room2_mockup_wall5"],
+				["room2_mockup_wall5_detect","Обнаружена","start","room2_mockup_wall5"],
+				["room2_mockup_wall6_undetect","Не обнаружена","stop","room2_mockup_wall6"],
+				["room2_mockup_wall6_detect","Обнаружена","start","room2_mockup_wall6"],
+
+				["room2_shome_voice_idle","Ожидание","start","room2_shome_voice"],
+				["room2_shome_voice_busy","Занят","stop","room2_shome_voice"],
+
+				["room2_safe_unlocked","Открыта","start","room2_safe"],
+				["room2_safe_locked","Заперта","stop","room2_safe"],
+
+				["room2_magbridge_circuit_undetected","Не обнаружен","stop","room2_magbridge_circuit"],
+				["room2_magbridge_circuit_detected","Обнаружен","start","room2_magbridge_circuit"],
+
+				["room2_table_coil1_unlocked","Открыта","start","room2_table_coil1"],
+				["room2_table_coil1_locked","Заперта","stop","room2_table_coil1"],
+				["room2_table_coil2_unlocked","Открыта","start","room2_table_coil2"],
+				["room2_table_coil2_locked","Заперта","stop","room2_table_coil2"],
+				["room2_table_coil3_unlocked","Открыта","start","room2_table_coil3"],
+				["room2_table_coil3_locked","Заперта","stop","room2_table_coil3"],
+
+				["room2_keyslot1_undetected","Не обнаружен","stop","room2_keyslot1"],
+				["room2_keyslot1_detected","Обнаружен","start","room2_keyslot1"],
+
+				["room2_vdoor_sensor_light_on","Включен","start","room2_vdoor_sensor_light"],
+				["room2_vdoor_sensor_light_off","Выключен","stop","room2_vdoor_sensor_light"],
+				["room2_vdoor_sensor_undetected","Не обнаружен","stop","room2_vdoor_sensor_detect"],
+
+				["room2_kid_voice_idle","Ожидание","start","room2_kid_voice"],
+				["room2_kid_voice_busy","Занят","stop","room2_kid_voice"],
+
+				["room2_vynil_default","Не пройден","stop","room2_vynil"],
+				["room2_vynil_passed","Пройден","start","room2_vynil"]				
+				
+			];
+		
+			function send_light() {
+				try{
+					var main = document.getElementById("main_light").value;
+					var uv = document.getElementById("uv_light").value;
+					serial_send("room1_main_light "+main);
+					serial_send("room1_uv_light "+uv);
+				}
+				catch(e) {
+					alert('unknown error');
+					return false;
+				}
+			}
+			
+			function send_room2_mockup_light() {
+				try{
+					var up = document.getElementById("room2_mockup_up_light").value;
+					var button = document.getElementById("room2_mockup_button_light").value;
+					var wall = document.getElementById("room2_mockup_wall_light").value;
+					serial_send("room2_mockup_up_light "+up);
+					serial_send("room2_mockup_button_light "+button);
+					serial_send("room2_mockup_wall_light "+wall);
+				}
+				catch(e) {
+					alert('unknown error');
+					return false;
+				}
+			}
+			function send_room2_floorlight(time) {
+				try{
+					var R = document.getElementById("room2_floorlight_R").value;
+					var G = document.getElementById("room2_floorlight_G").value;
+					var B = document.getElementById("room2_floorlight_B").value;
+					if(!time) serial_send("room2_floorlight_set "+R+" "+G+" "+B);
+					else {
+						var T = document.getElementById("room2_floorlight_T").value;
+						serial_send("room2_floorlight_transition "+R+" "+G+" "+B+" "+T);
+					}
+				}
+				catch(e) {
+					alert('unknown error');
+					return false;
+				}
+			}
+			
+			function getXmlHttp(){
+				var xmlhttp;
+				try {
+					xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+				} catch (e) {
+					try {
+						xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+					} catch (E) {
+						xmlhttp = false;
+					}
+				}
+				if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+					xmlhttp = new XMLHttpRequest();
+				}
+				return xmlhttp;
+			}
+		
+			function serial_send(str) {
+				//alert(str);
+				//return; 
+				
+				var req = getXmlHttp();
+				req.open("GET", '/serial?string='+str, true);
+				req.onreadystatechange = function() {
+					if (req.readyState == 4) {
+						if(req.status == 200) {
+							alert("принято");
+						}
+					}
+				}
+				req.send(null);
+			}
+			
+			function load_text_field(id, val, mode, msg) {
+				//alert(id+"||"+val+"||"+mode+"||"+msg);
+				try{
+					var item = document.getElementById(id);
+					if((msg!='')&&(item.textContent != val)) alert('ПРОИЗОШЕЛ СБОЙ!!! \n'+msg);
+					item.textContent = val;
+					if(mode=='start') item.className = "info_class start";
+					else if(mode=='stop') item.className = "info_class stop";
+					else if(mode=='error') item.className = "info_class error";
+				}
+				catch(e){
+					alert('unknown error');
+					return false;
+				}
+			}
+			
+			function load_status() {			
+				var req = getXmlHttp();
+				req.open("GET", '/status', true);
+				req.onreadystatechange = function() {
+					if (req.readyState == 4) {
+						if(req.status == 200) {
+							var arr = JSON.parse(req.responseText);
+							var mode="";
+							var str="";
+							if (arr.ping !== undefined) {
+								if(arr.ping=='start'){
+									mode='start';
+									str='Установлена';
+								}
+								else {
+									mode='stop';
+									str='Не установлена';
+								}
+								load_text_field('comm_cpu',str,mode,'');
+							}		
+							if (arr.room1_num_objects !== undefined) {
+								document.getElementById("room1_num_objects").value =arr.room1_num_objects;
+							}
+							
+							if (arr.room1_main_light !== undefined) {
+								document.getElementById("main_light_display").textContent =arr.room1_main_light;
+							}
+							
+							if (arr.room1_uv_light !== undefined) {
+								document.getElementById("uv_light_display").textContent =arr.room1_uv_light;
+							}
+							
+							if (arr.room2_mockup_up_light !== undefined) {
+								document.getElementById("room2_mockup_up_light_display").textContent =arr.room2_mockup_up_light;
+							}
+							if (arr.room2_mockup_button_light !== undefined) {
+								document.getElementById("room2_mockup_button_light_display").textContent =arr.room2_mockup_button_light;
+							}
+							if (arr.room2_mockup_wall_light !== undefined) {
+								document.getElementById("room2_mockup_wall_light_display").textContent =arr.room2_mockup_wall_light;
+							}
+							
+							if (arr.room2_main_light !== undefined) {
+								document.getElementById("room2_main_light_display").textContent =arr.room2_main_light;
+							}
+							
+							if (arr.room2_vdoor_sensor_detected !== undefined) {
+								document.getElementById("room2_vdoor_sensor_detect").textContent =arr.room2_vdoor_sensor_detected;
+							}
+							
+							if (arr.room2_floorlight_R !== undefined) {
+								document.getElementById("room2_floorlight_R_display").textContent =arr.room2_floorlight_R;
+							}
+							if (arr.room2_floorlight_G !== undefined) {
+								document.getElementById("room2_floorlight_G_display").textContent =arr.room2_floorlight_G;
+							}
+							if (arr.room2_floorlight_B !== undefined) {
+								document.getElementById("room2_floorlight_B_display").textContent =arr.room2_floorlight_B;
+							}
+							
+							for(var key in arr){
+								if(arr.hasOwnProperty(key)){
+									for(var i=0; i<statuses.length; i++) {
+										if(statuses[i][0]==arr[key]) {
+											var msg = '';
+											if (statuses[i][4] !== undefined) msg = statuses[i][4];
+											load_text_field(statuses[i][3], statuses[i][1], statuses[i][2], msg);
+										}
+									}
+								}
+							}
+
+						}
+					}
+				}
+				req.send(null);
+			}
+			
+			function confirm_serial_send(str,command) {
+				if(confirm(str)) {
+					serial_send(command);
+				}
+			}
+			
+			function play_voice() {
+				var num = document.getElementById("room2_shome_voice_play").value;
+				serial_send("room2_shome_voice_play "+num);
+			}
+			
+			function play_kid_voice() {
+				var num = document.getElementById("room2_kid_voice_play").value;
+				serial_send("room2_kid_voice_play "+num);
+			}
+			
+			function play_room1_sound() {
+				var num = document.getElementById("room1_sound_num").value;
+				serial_send("room1_sound_play  "+num);
+			}
+			
+			
+			function body_load() {
+				load_status();
+				setInterval(load_status, 1000);
+			}
+			
+			function collapse(fieldset) {
+				item = document.getElementById(fieldset);
+				if(!item.classList.contains("collapsed"))item.className += " collapsed ";
+				else item.classList.remove("collapsed");
+			}
+			
+			function reset_cpu() {
+				if(!confirm("Вы уверены, что хотите перезагрузить ЦПУ?")) {
+					return;
+				}
+				var req = getXmlHttp(); 
+				req.open("GET", '/reset_cpu', true);
+				req.onreadystatechange = function() {
+					if (req.readyState == 4) {
+						if(req.status == 200) {
+							//alert("принято");
+						}
+					}
+				}
+				req.send(null);
+			}
+		</script>
+	</head>
+	<body onload='body_load()'>
+		<h1>
+		<fieldset id='quest'>
+			<legend  onclick='collapse("quest");'>
+				Основное управление квестом | Состояние связи с ЦПУ: <div id='comm_cpu' class='info_class stop'>Нет связи</div><br>
+			</legend>
+			<a href='javascript:void(0);' class='button' onclick='serial_send("full_report"); '>Проверить всё</a>&nbsp;&nbsp;
+			<a href='/login?DISCONNECT=1' class='button'>Выход из админки</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button' onclick='confirm_serial_send("Вы действительно хотите перезагрузить квест?","reload");'>Перезарядить квест</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button' onclick='confirm_serial_send("Вы действительно хотите запустить квест?","start");'>Запустить квест</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button' onclick='confirm_serial_send("Вы действительно хотите остановить квест?","stop");'>Остановить квест</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button error' onclick='reset_cpu();'>Перезагрузить CPU</a>
+		</fieldset>
+		<br>
+		<fieldset id='fieldset_room1_main'>
+			<legend onclick='collapse("fieldset_room1_main");'>
+				Комната 1 | Статус комнаты: <div id='room1' class='info_class stop'>Остановлена</div><br>
+			</legend>
+			<a href='javascript:void(0);' class='button' onclick='confirm_serial_send("Вы действительно хотите перезагрузить комнату?","room1_reload");'>перезарядка (1-я комната)</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button' onclick='confirm_serial_send("Вы действительно хотите запустить комнату?","room1_start");'>запустить квест (1-я комната)</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button' onclick='confirm_serial_send("Вы действительно хотите остановить комнату?","room1_stop");'>прервать квест (1-я комната)</a><br>
+			Прохождение квеста в комнате: <div id='room1_game' class='info_class stop'>Остановлена</div><br>
+			<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_game_skip_scan");'>пропустить сканировение рук</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_game_start_print");'>начать печать объекта</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_game_extract_object");'>выбросить напечатанный объект</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_game_start_bgame");'>начать игру на кнопках</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_game_skip_bgame");'>пропустить игру</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_game_start_shrk");'>запустить уменьшитель</a>
+			<fieldset id='room1_sound'>
+				<legend onclick='collapse("room1_sound");'>Озвучка: | Статус: <div id='room1_sound_status' class='info_class start'>готовность</div><br></legend>
+				<a href='javascript:void(0);' class='button operate_button' onclick='play_room1_sound();'>Воспроизвести запись номер:</a>&nbsp;<input type="number" id="room1_sound_num" min="0" max="100" value="0"><br>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_sound_stop");'>Стоп</a>
+			</fieldset>
+			<fieldset id='room1_exitdoor'>
+				<legend onclick='collapse("room1_exitdoor");'>Выход во вторую комнату: | Статус: <div id='room1_exit' class='info_class stop'>Открыта</div><br></legend>
+				<a href='javascript:void(0);' class='button' onclick='serial_send("room1_exitdoor_unlock");'>выключить магнит</a>&nbsp;&nbsp;
+				<a href='javascript:void(0);' class='button' onclick='serial_send("room1_exitdoor_lock");'>включить магнит</a>&nbsp;&nbsp;
+			</fieldset>
+			
+			<fieldset id='room1_objects'>
+				<legend onclick='collapse("room1_objects");'>Установка объектов в слоты:</legend>
+				Требуемое количество объектов для открытия выхода (N: 0..3): <input type="number" id="room1_num_objects" min="0" max="3" value="3" onkeyup="serial_send('room1_game_num_objects '+this.value);"><br>
+				Объект 1: <div id='room1_object_1' class='info_class stop'>нет</div><br>
+				Объект 2: <div id='room1_object_2' class='info_class stop'>нет</div><br>
+				Объект 3: <div id='room1_object_3' class='info_class stop'>нет</div><br>
+			</fieldset>
+			<fieldset id='room1_light'>
+				<legend onclick='collapse("room1_light");'>Освещение</legend>
+				<table>
+					<tr>
+						<td> Главное освещение: <div id='main_light_display' style='display: inline;'>100</div></td>
+						<td> <input type="number" id="main_light" min="0" max="255" value="0"> </td>
+					</tr>
+					<tr>
+						<td>УФ-подсветка: <div id='uv_light_display' style='display: inline;'>100</div></td>
+						<td><input type="number" id="uv_light" min="0" max="255" value="0"></td>
+					</tr>	
+				</table>
+				<a href='javascript:void(0);' class='button operate_button' onclick='send_light();'>установить освещение</a>
+			</fieldset>
+		</fieldset>
+		<br>
+		<fieldset id="room1_system_fieldset">
+			<legend onclick='collapse("room1_system_fieldset");'>
+				Комната 1 - Системные | Связь с комнатой: <div id='comm_room1' class='info_class stop'>Не установлена</div><br>
+			</legend>
+
+			<fieldset id='room1_scaner' class='collapsed'>
+				<legend onclick='collapse("room1_scaner");'>
+					Сканеры руки | Состояние: <div id='status_scan' class='info_class stop'>Не пройден</div><br>
+				</legend>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_scan_finish");'>принудительно завершить</a>&nbsp;&nbsp;
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_scan_reset");'>сброс</a>
+			</fieldset>		
+			<fieldset id='room1_printer' class='collapsed'>
+				<legend onclick='collapse("room1_printer");'>
+					Принтер | Состояние: <div id='status_print' class='info_class stop'>Остановлен</div><br>
+				</legend>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_print_stop");'>остановить печать</a>&nbsp;&nbsp;
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_print_go_home");'>возврат/калибровка головки</a>&nbsp;&nbsp;
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_print_start");'>запустить печать</a>
+				<fieldset  id='room1_lift' class='collapsed'>
+					<legend onclick='collapse("room1_lift");'>
+						Шторка: | Состояние: <div id='status_lift' class='info_class stop'>Остановлена</div><br>
+					</legend>
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_lift_stop");'>остановить шторку</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_lift_extend");'>поднять шторку</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_lift_slow_extend");'>медленно поднимать шторку</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_lift_retract");'>опустить шторку</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_lift_slow_retract");'>медленно опускать шторку</a>
+				</fieldset>
+				<fieldset id='room1_extractor' class='collapsed'>
+					<legend onclick='collapse("room1_extractor");'>
+						Выбрасыватель фигур | Состояние: <div id='status_extr' class='info_class stop'>Остановлен</div><br>
+					</legend>
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_extr_stop");'>остановить выбрасыватель</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_extr_extend");'>выдвинуть выбрасыватель</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_extr_retract");'>убрать выбрасыватель</a>
+				</fieldset>
+			</fieldset>
+			<fieldset id='room1_reducer'>
+				<legend onclick='collapse("room1_reducer");'>
+					Уменьшитель | Состояние установки объекта: <div id='status_shrk_object' class='info_class stop'>Не обнаружен</div><br>
+				</legend>
+				<fieldset id='room1_reducer_platform' class='collapsed'>
+					<legend onclick='collapse("room1_reducer_platform");'>
+						Платформа | Состояние: <div id='status_shrk_platform' class='info_class stop'>Остановлена</div><br>
+					</legend>
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_shrk_stop");'>остановить</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_shrk_left");'>переместить камерой приёма к игроку</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_shrk_right");'>переместить камерой выдачи к игроку</a>
+				</fieldset>
+				<fieldset id='room1_reducer_door' class='collapsed'>
+					<legend onclick='collapse("room1_reducer_door");'>
+						Дверка | Состояние: <div id='status_shrk_door' class='info_class stop'>Открыта</div><br>
+					</legend>
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_shrk_door_lock");'>заблокировать дверку</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_shrk_door_unlock");'>разблокировать дверку</a>
+				</fieldset>
+			</fieldset>	
+				<fieldset id='room1_bgame' class='collapsed'>
+					<legend onclick='collapse("room1_bgame");'>
+						Игра с кнопками | Состояние: <div id='status_bgame' class='info_class stop'>Остановлена</div><br>
+					</legend>
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_bgame_reset");'>Сброс</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_bgame_finish");'>принудительно завершить</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_bgame_start_1");'>начать уровень 1</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_bgame_start_2");'>начать уровень 2</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room1_bgame_start_3");'>начать уровень 3</a>&nbsp;&nbsp;
+				</fieldset>
+		</fieldset>
+		<br>
+		<fieldset id='room2_fieldset'>
+			<legend onclick='collapse("room2_fieldset");'>
+				Комната 2 | Статус комнаты: <div id='room2' class='info_class stop'>Остановлена</div><br>
+			</legend>
+			<a href='javascript:void(0);' class='button' onclick='confirm_serial_send("Вы действительно хотите перезагрузить комнату?","room2_reload");'>Перезарядить комнату</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button' onclick='confirm_serial_send("Вы действительно хотите запустить комнату?","room2_start");'>Запустить комнату</a>&nbsp;&nbsp;
+			<a href='javascript:void(0);' class='button' onclick='confirm_serial_send("Вы действительно хотите остановить комнату?","room2_stop");'>Остановить комнату</a>
+			<fieldset id='room2_comm' class='collapsed'>
+				<legend onclick='collapse("room2_comm");'>Статусы связи с узлами</legend>
+				Связь с макетом: <div id='room2_mockup' class='info_class stop'>Остановлена</div><br>
+				Связь с виртуальной дверью: <div id='room2_vdoor' class='info_class stop'>Остановлена</div><br>
+				Связь со столом: <div id='room2_table' class='info_class stop'>Остановлена</div><br>
+			</fieldset>
+			<fieldset id='room2_light'>
+				<legend onclick='collapse("room2_light");'>Освещение</legend>
+				Основное освещение: <div id='room2_main_light_display' style='display: inline;'>100</div>&nbsp;
+				<input type="number" id="room2_main_light" min="0" max="100" value="0" onkeyup="serial_send('room2_main_light '+this.value);">
+				<fieldset id='room2_light_floor' class='collapsed'>
+					<legend onclick='collapse("room2_light_floor");'>Нижнее освещение</legend>
+					<table>
+						<tr>
+							<td>Красный:&nbsp;&nbsp;</td>
+							<td><div id='room2_floorlight_R_display' style='display: inline;'>100</div></td>
+							<td><input type="number" id="room2_floorlight_R" min="0" max="100" value="0"></td>
+						</tr>
+						<tr>
+							<td>Зеленый:</td>
+							<td><div id='room2_floorlight_G_display' style='display: inline;'>100</div>	&nbsp;&nbsp;</td>
+							<td><input type="number" id="room2_floorlight_G" min="0" max="100" value="0"></td>
+						</tr>
+						<tr>
+							<td>Синий:</td>
+							<td><div id='room2_floorlight_B_display' style='display: inline;'>100</div></td>
+							<td><input type="number" id="room2_floorlight_B" min="0" max="100" value="0"></td>
+						</tr>
+						<tr>
+							<td>&nbsp;</td>
+							<td>&nbsp;</td>
+							<td><a href="javascript:void(0);" class="button operate_button" onclick="send_room2_floorlight(false);">Установить освещение</a></td>
+						</tr>
+						<tr><td colspan=100%><hr></td></tr>
+						<tr>
+							<td>Время перехода (мсек):</td>
+							<td><div id='room2_floorlight_T_display' style='display: inline;'>100</div></td>
+							<td><input type="number" id="room2_floorlight_T" min="0" max="1000" value="0"></td>
+						</tr>
+						<tr>
+							<td>&nbsp;</td>
+							<td>&nbsp;</td>
+							<td><a href="javascript:void(0);" class="button operate_button" onclick="send_room2_floorlight(true);">Установить освещение и время перехода</a></td>
+						</tr>
+					</table>
+				</fieldset>
+			</fieldset>
+			<fieldset id='room2_door' class='collapsed'	>
+				<legend onclick='collapse("room2_door");'>Выходная дверь | Статус: <div id='room2_exitdoor' class='info_class start'>Открыта</div><br></legend>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_exitdoor_unlock");'>Открыть</a>&nbsp;&nbsp;
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_exitdoor_lock");'>Закрыть</a>&nbsp;&nbsp;
+			</fieldset>
+			Игра с шариками: <div id='room2_ballgame' class='info_class stop'>Не пройдена</div><br>
+			<fieldset id='room2_stand'>
+				<legend onclick='collapse("room2_stand");'>Стойка (изобретения)</legend>
+				<fieldset id='room2_stand_coli1_fieldset' class='collapsed'>
+					<legend onclick='collapse("room2_stand_coli1_fieldset");'>Изобретение 1 | Статус: <div id='room2_stand_coil1' class='info_class start'>Открыто</div><br></legend>
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_stand_coil1_unlock");'>Открыть</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_stand_coli1_lock");'>Закрыть</a>&nbsp;&nbsp;
+				</fieldset>
+				<fieldset id='room2_stand_coli2_fieldset' class='collapsed'>
+					<legend onclick='collapse("room2_stand_coli2_fieldset");'>Изобретение 2 | Статус: <div id='room2_stand_coil2' class='info_class start'>Открыто</div><br></legend>
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_stand_coil2_unlock");'>Открыть</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_stand_coli2_lock");'>Закрыть</a>&nbsp;&nbsp;
+				</fieldset>
+				<fieldset id='room2_stand_coli3_fieldset' class='collapsed'>
+					<legend onclick='collapse("room2_stand_coli3_fieldset");'>Изобретение 3 | Статус: <div id='room2_stand_coil3' class='info_class start'>Открыто</div><br></legend>
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_stand_coil3_unlock");'>Открыть</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_stand_coli3_lock");'>Закрыть</a>&nbsp;&nbsp;
+				</fieldset>
+			</fieldset>
+			<fieldset id='room2_eyes' class='collapsed'>
+				<legend onclick='collapse("room2_eyes");'>Глаза | Статус: <div id='room2_eyes_circuit' class='info_class stop'>Не обнаружен</div><br></legend>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_eyes_unlock_1");'>Пройти первые</a>&nbsp;&nbsp;
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_eyes_unlock_2");'>Пройти вторые</a>&nbsp;&nbsp;
+			</fieldset>
+			<fieldset id='room2_mockup_fieldset'>
+				<legend onclick='collapse("room2_mockup_fieldset");'>Макет</legend>
+				<fieldset id='room2_mockup_light' class='collapsed'>
+					<legend onclick='collapse("room2_mockup_light");'>Освещение</legend>
+					Верхняя подсветка: <div id='room2_mockup_up_light_display' style='display: inline;'>100</div>&nbsp;&nbsp;<input type="number" id="room2_mockup_up_light" min="0" max="100" value="0"><br>
+					Подсветка кнопок: <div id='room2_mockup_button_light_display' style='display: inline;'>100</div>&nbsp;&nbsp;<input type="number" id="room2_mockup_button_light" min="0" max="100" value="0"><br>
+					Подсветка стен: <div id='room2_mockup_wall_light_display' style='display: inline;'>100</div>&nbsp;&nbsp;<input type="number" id="room2_mockup_wall_light" min="0" max="100" value="0"><br>
+					<a href='javascript:void(0);' class='button operate_button' onclick='send_room2_mockup_light();'>установить освещение</a>
+				</fieldset>
+				<fieldset id='room2_mockup_walls' class='collapsed'>
+					<legend onclick='collapse("room2_mockup_walls");'>Стенки</legend>
+					Первая стенка: <div id='room2_mockup_wall1' class='info_class stop'>Не обнаружена</div><br>
+					Вторая стенка: <div id='room2_mockup_wall2' class='info_class stop'>Не обнаружена</div><br>
+					Третья стенка: <div id='room2_mockup_wall3' class='info_class stop'>Не обнаружена</div><br>
+					Четвертая стенка: <div id='room2_mockup_wall4' class='info_class stop'>Не обнаружена</div><br>
+					Пятая стенка: <div id='room2_mockup_wall5' class='info_class stop'>Не обнаружена</div><br>
+					Шестая стенка: <div id='room2_mockup_wall6' class='info_class stop'>Не обнаружена</div><br>
+				</fieldset>
+			</fieldset>
+			<fieldset id='room2_locker' class='collapsed'>
+				<legend onclick='collapse("room2_locker");'>Шкафчик в стене</legend>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_locker_unlock");'>Открыть</a>
+			</fieldset>
+			<fieldset id='room2_shome_voice_fieldset' class='collapsed'>
+				<legend onclick='collapse("room2_shome_voice_fieldset");'>Голосовой модуль умного дома | Статус: <div id='room2_shome_voice' class='info_class stop'>Ожидание</div><br></legend>
+				<a href='javascript:void(0);' class='button operate_button' onclick='play_voice();'>Воспроизвести подсказку номер:</a>&nbsp;<input type="number" id="room2_shome_voice_play" min="0" max="100" value="0"><br>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_shome_voice_stop");'>Остановить воспроизведение</a>
+			</fieldset>
+			<fieldset id='room2_safe_fieldset' class='collapsed'>
+				<legend onclick='collapse("room2_safe_fieldset");'>Сейф | Статус: <div id='room2_safe' class='info_class start'>Открыт</div><br></legend>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_safe_reset");'>Сбросить</a>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_safe_unlock");'>Открыть</a>
+			</fieldset>
+			Мостик с магнитами: <div id='room2_magbridge_circuit' class='info_class stop'>Не обнаружен</div><br>
+			<fieldset id='room2_table_fieldset'>
+				<legend  onclick='collapse("room2_table_fieldset");'>Стол</legend>
+				<fieldset id='room2_table_coil1_fieldset' class='collapsed'>
+					<legend onclick='collapse("room2_table_coil1_fieldset");'>Ящик 1 | Статус: <div id='room2_table_coil1' class='info_class start'>Открыто</div><br></legend>
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_table_coil1_unlock");'>Открыть</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_table_coil1_lock");'>Закрыть</a>&nbsp;&nbsp;
+				</fieldset>
+				<fieldset id='room2_table_coil2_fieldset' class='collapsed'>
+					<legend onclick='collapse("room2_table_coil2_fieldset");'>Ящик 2 | Статус: <div id='room2_table_coil2' class='info_class start'>Открыто</div><br></legend>
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_table_coil2_unlock");'>Открыть</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_table_coil2_lock");'>Закрыть</a>&nbsp;&nbsp;
+				</fieldset>
+				<fieldset id='room2_table_coil3_fieldset' class='collapsed'>
+					<legend onclick='collapse("room2_table_coil3_fieldset");'>Ящик 3 | Статус: <div id='room2_table_coil3' class='info_class start'>Открыто</div><br></legend>
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_table_coil3_unlock");'>Открыть</a>&nbsp;&nbsp;
+					<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_table_coil3_lock");'>Закрыть</a>&nbsp;&nbsp;
+				</fieldset>
+			</fieldset>
+			Слот универсального ключа - 1: <div id='room2_keyslot1' class='info_class stop'>Не обнаружен</div><br>
+			<fieldset id='room2_vdoor_fieldset' class='collapsed'>
+				<legend onclick='collapse("room2_vdoor_fieldset");'>Виртуальная дверь | Статус: <div id='room2_vdoor_sensor_detect' class='info_class start'>Выполнено</div><br></legend>
+				Подсветка: <div id='room2_vdoor_sensor_light' class='info_class start'>Включена</div><br>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_vdoor_sensor_light_off");'>Выключить подсветку</a>&nbsp;&nbsp;
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_vdoor_sensor_light_on");'>Включить подсветку</a>&nbsp;&nbsp;
+			</fieldset>
+			<fieldset id='room2_kid_voice_fieldset' class='collapsed'>
+				<legend onclick='collapse("room2_kid_voice_fieldset");'>Голос сына | Статус: <div id='room2_kid_voice' class='info_class start'>Ожидание</div><br></legend>
+				<a href='javascript:void(0);' class='button operate_button' onclick='play_kid_voice();'>Воспроизвести запись номер:</a>&nbsp;<input type="number" id="room2_kid_voice_play" min="0" max="100" value="0"><br>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_kid_voice_stop");'>Остановить воспроизведение</a>
+			</fieldset>
+			<fieldset id='room2_vynil_fieldset' class='collapsed'>
+				<legend onclick='collapse("room2_vynil_fieldset");'>Винил | Статус: <div id='room2_vynil' class='info_class start'>Не пройден</div><br></legend>
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_vynil_finish");'>Пройти</a>&nbsp;&nbsp;
+				<a href='javascript:void(0);' class='button operate_button' onclick='serial_send("room2_vynil_reset");'>Сбросить</a>
+			</fieldset>
+		</fieldset>
+	</body>
+</html>

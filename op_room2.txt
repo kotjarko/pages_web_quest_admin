@@ -1,0 +1,161 @@
+Вторая комната. Операторские команды и статусы.
+=================================================
+
+
+основное управление:
+	room2_start						- запустить квест (2-я комната)
+	room2_stop          					- прервать квест (2-я комната)
+	room2_reload        					- перезарядка (2-я комната)
+
+выход в 3-ю комн.:
+	команды:
+		room2_exitdoor_unlock				- выключить магнит
+		room2_exitdoor_lock     			- включить магнит
+	статусы:                    
+		room2_exitdoor_unlocked 			- магнит выключен
+		room2_exitdoor_locked   			- магнит включен
+		
+освещение (N = 0*..100):
+	команды:
+		room2_main_light N				- главное освещение
+	статусы:
+		room2_main_light N				-  главное освещение
+
+прохождение квеста:
+	TODO
+
+	
+==================================
+технические команды и статусы
+==================================
+
+стойка:
+	команды:
+		room2_stand_coil1_unlock			- выключить магнит первой ячейки
+		room2_stand_coil1_lock			- включить магнит первой ячейки
+
+		room2_stand_coil2_unlock			- выключить магнит второй ячейки
+		room2_stand_coil2_lock			- включить магнит второй ячейки
+
+		room2_stand_coil3_unlock			- выключить магнит третьей ячейки
+		room2_stand_coil3_lock			- включить магнит третьей ячейки
+
+	статусы:
+		room2_stand_coil1_unlocked*		- магнит первой ячейки выключен
+		room2_stand_coil1_locked			- магнит первой ячейки включен
+
+		room2_stand_coil2_unlocked*		- магнит второй ячейки выключен
+		room2_stand_coil2_locked			- магнит второй ячейки включен
+
+		room2_stand_coil3_unlocked*		- магнит третьей ячейки выключен
+		room2_stand_coil3_locked			- магнит третьей ячейки включен
+		
+		
+глаза для вытыкивания:
+	команды:
+		room2_eyes_unlock_1				- открыть первый отсек с глазами
+		room2_eyes_unlock_2				- открыть второй отсек с глазами
+	статусы:
+		room2_eyes_circuit_undetected*		- вытыкивание обнаружено
+		room2_eyes_circuit_detected		- вытыкивание не обнаружено
+		
+нижняя подсветка (R, G, B = 0..100, T = 0..2550 мс):
+	команды:
+		room2_floorlight_set R G B			- установить цвет свечения
+		room2_floorlight_transition R G B T 	- установить цвет свечения с переходом
+	
+макет (N = 0*..100):
+	команды:
+		room2_mockup_up_light N			- верхняя подсветка
+		room2_mockup_button_light N		- подсветка кнопок на полу макета
+		room2_mockup_wall_light N			- подсветка стен макета
+	статусы:
+		room2_mockup_wall1_undetect*		- первая стена не установлена
+		room2_mockup_wall1_detect			- первая стена установлена 
+
+		room2_mockup_wall2_undetect*		- вторая стена не установлена
+		room2_mockup_wall2_detect			- вторая стена установлена 
+
+		room2_mockup_wall3_undetect*		- третья стена не установлена
+		room2_mockup_wall3_detect			- третья стена установлена 
+
+		room2_mockup_wall4_undetect*		- четвёртая стена не установлена
+		room2_mockup_wall4_detect			- четвёртая стена установлена 
+
+		room2_mockup_wall5_undetect*		- пятая стена не установлена
+		room2_mockup_wall5_detect			- пятая стена установлена 
+	
+		room2_mockup_wall6_undetect*		- шестая стена не установлена
+		room2_mockup_wall6_detect			- шестая стена установлена 
+	
+голос "умного дома":
+	команды:
+		room2_shome_voice_play N			- воспроизвести фразу N
+		room2_shome_voice_stop			- остановить воспроизведение
+	статусы:
+		room2_shome_voice_idle*			- готов
+		room2_shome_voice_busy			- идёт воспроизведение
+		
+	
+виниловая шарманка:
+	команды:
+		room2_vinyl_reset				- сброс
+
+		room2_vinyl_enable				- активировать
+		room2_vinyl_disable				- отключить
+
+	статусы:
+		room2_vinyl_disabled*				- отключена
+		room2_vinyl_enabled				- активирована
+		
+		room2_vinyl_default*				- не пройдена
+		room2_vinyl_passed				- пройдена
+	
+виртуальная дверь:
+	команды:
+		room2_vdoor_sensor_light_off 		- выключить подсветку сенсора цвета
+		room2_vdoor_sensor_light_on 		- включить подсветку сенсора цвета
+
+	статусы:
+		room2_vdoor_sensor_light_off*		- подсветка выключена
+		room2_vdoor_sensor_light_on 		- подсветка включена
+		
+		room2_vdoor_sensor_undetected*		- объект не обнаружен
+		room2_vdoor_sensor_detected N 		- обнаружен объект N
+	
+голос виртуального сына из-за виртуальной двери:
+	команды:
+		room2_kid_voice_play N 			- воспроизвести фразу N
+		room2_kid_voice_stop 				- остановить воспроизведение
+	статусы:
+		room2_kid_voice_idle*				- готов
+		room2_kid_voice_busy				- идёт воспроизведение
+		
+сейф:
+	команды:
+		room2_safe_reset				- сброс
+		room2_safe_unlock				- открыть принудительно
+	статусы:
+		room2_table_safe_safe*			- сейф в порядке
+		room2_table_safe_hacked			- сейф вскрыт
+		
+магнитный мостик:
+	статусы:
+		room2_table_magbridge_opened*		- разомкнут
+		room2_table_magbridge_closed 		- замкнут
+	
+стол с ящичками:
+	команды:
+		room2_table_coil1_unlock			- выключить магнит первого ящичка
+		room2_table_coil1_lock			- включить магнит первого ящичка
+		room2_table_coil2_unlock			- выключить магнит второго ящичка
+		room2_table_coil2_lock			- включить магнит второго ящичка
+		room2_table_coil3_unlock			- выключить магнит третьего ящичка
+		room2_table_coil3_lock			- включить магнит третьего ящичка
+	статусы:
+		room2_table_coil1_unlocked*		- магнит первого ящичка выключен
+		room2_table_coil1_locked  			- магнит первого ящичка включен
+		room2_table_coil2_unlocked*		- магнит второго ящичка выключен
+		room2_table_coil2_locked  			- магнит второго ящичка включен
+		room2_table_coil3_unlocked*		- магнит третьего ящичка выключен
+		room2_table_coil3_locked  			- магнит третьего ящичка включен
